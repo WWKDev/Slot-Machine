@@ -1,0 +1,22 @@
+{
+  "name": "javascript-projects",
+  "version": "1.0.0",
+  "description": "",
+  "main": "slotMachine.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WWKDev/Slot-Mahine.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WWKDev/Slot-Mahine/issues"
+  },
+  "homepage": "https://github.com/WWKDev/Slot-Mahine#readme",
+  "dependencies": {
+    "prompt-sync": "^4.2.0"
+  }
+}
