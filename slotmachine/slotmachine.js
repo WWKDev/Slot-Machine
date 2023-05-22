@@ -1,32 +1,19 @@
 
 const prompt = require("prompt-sync")(); //library for promp sync
 
-//Game Size (3x3)
-const ROWS = 3;
-const COLS = 3;
+//Game Config
+const ROWS = 3; //Rows in game grid
+const COLS = 3; //Columns in game grid 
+const SYMBOLS_COUNT = {7: 2, A: 4, B: 6, C: 8}; //Count of each symbol
+const SYMBOLS_VALUE = {7: 7, A: 3, B: 2, C: 1}; //Value of each symbol
 
-//Symbol Count
-const SYMBOLS_COUNT = {
-    7: 2,
-    A: 4,
-    B: 6,
-    C: 8
-}
-
-//Symbol Value
-const SYMBOLS_VALUE = {
-    7: 7,
-    A: 3,
-    B: 2,
-    C: 1
-}
-
-//Deposit function
-const deposit = () => {
+//Validate deposit and return deposit amount
+const getDepositAmount = () => {
     while (true) {
         const depositAmount = prompt("Enter deposit amount: ");
-        const numberDepositAmount = parseFloat(depositAmount); //string to float
+        const numberDepositAmount = parseFloat(depositAmount);
 
+        //Check if deposit amount if valid and if its more than 0.
         if (isNaN(numberDepositAmount) || numberDepositAmount <= 0) {
             console.log("Invalid amount, enter again.");
         }
@@ -36,12 +23,13 @@ const deposit = () => {
     }
 };
 
-//Number of lines to bet on function
+//Validate and return no. of lines to bet on
 const getNumberOfLines = () => {
     while (true) {
         const lines = prompt("Enter the number of lines to bet on (1-3): ");
         const numberOfLines = parseInt(lines); //string to float
 
+        //Check if number of lines is a valid number and within range.
         if (isNaN(numberOfLines) || numberOfLines <= 0 || numberOfLines > 3) {
             console.log("Invalid number of lines, enter again.");
         }
@@ -52,12 +40,13 @@ const getNumberOfLines = () => {
 
 }
 
-//Bet amount function
+//Validate and return bet amount
 const getBet = (balance, lines) => {
     while (true) {
         const betAmount = prompt("Enter bet amount per line: ");
         const numberBetAmount = parseFloat(betAmount); //string to float
 
+        //Check if bet amount is a valid number, more than 0 and within available balance
         if (isNaN(numberBetAmount) || numberBetAmount <= 0 || numberBetAmount > balance / lines) {
             console.log("Invalid bet amount, enter again.");
         }
@@ -67,7 +56,7 @@ const getBet = (balance, lines) => {
     }
 }
 
-//Spin reel and get output function
+//Spin reel and generate random symbols for the reel
 const spin = () => {
     const symbols = [];
     for (const [symbol, count]of Object.entries(SYMBOLS_COUNT)) {
@@ -89,7 +78,7 @@ const spin = () => {
     return reels;
 }
 
-//Transpose Matrix (flip rows and columns)
+//Transpose Matrix (turn columns into rows)
 const transpose = (reels) => {
     const rows = [];
     for (let i = 0; i < ROWS; i++) {
@@ -101,20 +90,13 @@ const transpose = (reels) => {
     return rows
 }
 
-//Print rows of transposed matrix
+//Print rows of game grid (transposed matrix)
 const printRows = (rows) => {
     for (const row of rows) {
-        let rowString = "";
-        for (const [i, symbol] of row.entries()) {
-            rowString += symbol
-            if (i != row.length - 1) {
-                rowString += " | "
-            }
-        }
-        console.log(rowString)
+        console.log(row.join(' | ')); //use Array.join()
     }
 }
-
+//Winnings multiplier
 const getWinnings = (rows, betAmount, lines) => {
     let winnings = 0;
     for (let row = 0; row < lines; row++) {
@@ -135,10 +117,25 @@ const getWinnings = (rows, betAmount, lines) => {
     return winnings;
 }
 
-const game = () => {
-    let balance = deposit();
-
+//Check if player wish to continue
+const askToPlayAgain = () => {
     while (true) {
+        const playAgain = prompt("Do you wish to play again (y/n)?").toLowerCase();
+        if(playAgain === 'y' || playAgain === "yes") {
+        return true;
+        }
+        else if (playAgain === 'n' || playAgain === "no") {
+            return false;
+        }
+        else {
+            console.log("Please enter 'y' or 'n'.");
+        }
+    }
+}
+
+//Main game loop, runs till $ == 0 or player quits
+const gameLoop = (balance) => {
+    while (balance > 0) {
         console.log(`Your balance is $${balance}.`);
         const numberOfLines = getNumberOfLines();
         const betAmount = getBet(balance, numberOfLines);
@@ -148,19 +145,29 @@ const game = () => {
         printRows(rows);
         const winnings = getWinnings(rows, betAmount, numberOfLines);
         balance += winnings;
-        console.log(`You won, $${winnings}.`);
+
+        if (winnings > 0) {
+            console.log(`You won, $${winnings}.`);
+        }
+        else {
+            console.log(`Too bad, you lost $${betAmount * numberOfLines}.`); //How much the player lost that round
+        }
 
         if (balance <= 0) {
             console.log("Out of money!");
             break;
         }
 
-        const playAgain = prompt("Do you wish to play again (y/n) ?")
-
-        if (playAgain != "y")
-        break;
+        if (!askToPlayAgain()) {
+            break;
+        }
      }
+    }
 
+//Initialize game
+const startGame = () => {
+    let balance = getDepositAmount();
+    gameLoop(balance);
 }
 
-game();
+startGame();
